@@ -1,4 +1,4 @@
-const User = require("../models/user");
+const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const generateToken = (id, role) => {
@@ -13,11 +13,11 @@ const addUser = async (req, res) => {
   try {
     if (!fullName || !email || !password || !role || !phoneNumber)
       throw Error("All fields must be filled !");
-    const exist = await Users.findOne({ email });
+    const exist = await User.findOne({ email });
     if (exist) throw Error("Email already in use");
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const user = await Users.create({
+    const user = await User.create({
       fullName: fullName,
       email: email,
       password: hashedPassword,
@@ -37,18 +37,20 @@ const addUser = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-      if (!email || !password) throw Error("All fields must be filled");
-      const user = await User.find({ email, password }); // User.find({}) == select * from user
-      const exist = await Users.findOne({ email });
-      if (!exist) throw Error("Not registered yet");
-      const comparing = await bcrypt.compare(password, exist.password);
-      if (!comparing) throw Error("Passwords does not match");
-      const token = generateToken(exist._id, exist.role);
-        res.status(200).json({ message: "login successfully", token });
-    } catch (error) {
-        res.status(500).json({ message: `Failed to login by ${email}`, error: error.message })
-    }
-}
+    if (!email || !password) throw Error("All fields must be filled");
+    const user = await User.find({ email, password }); // User.find({}) == select * from user
+    const exist = await Users.findOne({ email });
+    if (!exist) throw Error("Not registered yet");
+    const comparing = await bcrypt.compare(password, exist.password);
+    if (!comparing) throw Error("Passwords does not match");
+    const token = generateToken(exist._id, exist.role);
+    res.status(200).json({ message: "login successfully", token });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: `Failed to login by ${email}`, error: error.message });
+  }
+};
 
 const getAllUsers = async (req, res) => {
   try {
@@ -152,6 +154,55 @@ const updateUserByID = async (req, res) => {
   }
 };
 
+const switchToAdmin = async (req, res) => {
+  const { ID } = req.params;
+
+  try {
+    const [response] = await connection.query(query, [ID]);
+    if (!response.affectedRows)
+      return res.status(400).json({
+        success: false,
+        message: `User with ID = ${ID} not found`,
+      });
+    const data = await getUserByID(ID);
+    res.status(200).json({
+      success: true,
+      message: `User with ID = ${ID} switched to admin successfully`,
+      data: data[0],
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: `Unable to switch to admin for user with ID = ${ID}`,
+      error: error.message,
+    });
+  }
+};
+
+const switchToSeller = async (req, res) => {
+  const { ID } = req.params;
+  try {
+    const [response] = await connection.query(query, [ID]);
+    if (!response.affectedRows)
+      return res.status(400).json({
+        success: false,
+        message: `User with ID = ${ID} not found`,
+      });
+    const data = await getUserByID(ID);
+    res.status(200).json({
+      success: true,
+      message: `User with ID = ${ID} switched to admin successfully`,
+      data: data[0],
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: `Unable to switch to admin for user with ID = ${ID}`,
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   addUser,
   login,
@@ -159,4 +210,6 @@ module.exports = {
   getUserByID,
   updateUserByID,
   deleteUserByID,
+  switchToAdmin,
+  switchToSeller,
 };
