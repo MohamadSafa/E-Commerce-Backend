@@ -4,16 +4,16 @@ const Product = require('../models/product');
 
 const getCartByUserID = async (req, res) => {
     try {
-        const userExists = await User.findById(req.params.userId);
+        const userExists = await User.findById(req.params.userID);
 
         if (!userExists) {
             return res.status(404).json({
                 success: false,
-                message: `No cart for the user with id ${req.params.userId}`,
+                message: `No cart for the user with id ${req.params.userID}`,
             });
         }
 
-        const cart = await Cart.findOne({ userId: req.params.userId }).populate('products.productId', 'quantity');
+        const cart = await Cart.findOne({ userId: req.params.userID }).populate('products.productId', 'products.quantity');
 
         res.status(200).json({
             success: true,
@@ -24,7 +24,7 @@ const getCartByUserID = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to get cart by user id',
-            error: error,
+            error: error.message,
         });
     }
 };
@@ -42,11 +42,11 @@ const addProductToCart = async (req, res) => {
             });
         }
 
-        const cart = await Cart.findOne({ userId: req.params.userId });
+        const cart = await Cart.findOne({ userId: req.params.userID });
         if (!cart) {
             return res.status(404).json({
                 success: false,
-                message: `No cart for the user with id ${req.params.userId} available`,
+                message: `No cart for the user with id ${req.params.userID} available`,
             });
         }
 
@@ -68,47 +68,64 @@ const addProductToCart = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to add product to cart',
-            error: error,
+            error: error.message,
         });
     }
 };
 
-const removeProductFromCart = async (req, res) => {
+const updateProductInCart = async (req, res) => {
     try {
-        const { productId, quantityToRemove } = req.body;
+        const { productID, quantity } = req.body;
 
-        const cart = await Cart.findOne({ userId: req.params.userId });
+        const cart = await Cart.findOne({ _id: req.params.cartID });
 
         if (!cart) {
             return res.status(404).json({
                 success: false,
-                message: `No cart for the user with id ${req.params.userId} available`,
+                message: `No cart with id ${req.params.cartID} available`,
             });
         }
 
-        const existingProduct = cart.products.find(product => product.productId.toString() === productId);
+        const productExists = await Product.findById(productID);
 
-        if (!existingProduct) {
+        if (!productExists) {
             return res.status(404).json({
                 success: false,
-                message: `Product with id ${productId} not found in the cart`,
+                message: `No product with id ${productID} available`,
             });
         }
 
-        // existingProduct.quantity -= quantityToRemove;
+        if (!cart.products.some(product => product.productId.toString() === productID)) {
+            // Product not found in the cart
+            return res.status(401).json({
+                success: false,
+                message: `Product with id ${productID} not found in your cart`,
+            });
+        }
 
-        await cart.save();
+        const index = cart.products.indexOf(productID);
+        if (index !== -1) {
+            if (quantity > 0) {
+                // Update quantity
+                cart.products[index].quantity = quantity;
+            } else {
+                // Remove product if quantity is zero
+                cart.products.splice(index, 1);
+            }
+
+            await cart.save();
+        }
 
         res.status(200).json({
             success: true,
-            message: 'Product removed from cart successfully',
+            message: 'Cart updated successfully',
             data: cart,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Unable to remove product from cart',
-            error: error,
+            message: 'Unable to update cart',
+            error: error.message,
         });
     }
 };
@@ -116,5 +133,5 @@ const removeProductFromCart = async (req, res) => {
 module.exports = {
     getCartByUserID,
     addProductToCart,
-    removeProductFromCart,
+    updateProductInCart,
 };

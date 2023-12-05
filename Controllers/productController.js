@@ -1,8 +1,5 @@
 const Product = require('../models/product');
-const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 const { imageUploader } = require('../extra/imageUploader');
-const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() });
 
 const addProduct = async (req, res) => {
     try {
@@ -56,7 +53,7 @@ const addProduct = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to add product',
-            error: error,
+            error: error.message,
         });
     }
 };
@@ -73,19 +70,19 @@ const getAllProducts = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to get all products',
-            error: error,
+            error: error.message,
         });
     }
 };
 
 const getProductByID = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.Id);
+        const product = await Product.findById(req.params.ID);
 
         if (!product) {
             return res.status(404).json({
                 success: false,
-                message: `Product with id ${req.params.Id} not found`,
+                message: `Product with id ${req.params.ID} not found`,
             });
         }
         res.status(200).json({
@@ -97,14 +94,14 @@ const getProductByID = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to get product data by id',
-            error: error,
+            error: error.message,
         });
     }
 };
 
 const updateProductByID = async (req, res) => {
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.Id, req.body);
+        const updatedProduct = await Product.findByIdAndUpdate(req.params.ID, req.body);
         if (!updatedProduct) {
             res.status(404).json({
                 success: false,
@@ -121,25 +118,25 @@ const updateProductByID = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to update product',
-            error: error,
+            error: error.message,
         });
     }
 };
 
 const deleteProductByID = async (req, res) => {
     try {
-        const deletedProduct = await Product.deleteOne({ _id: req.params.Id });
+        const deletedProduct = await Product.deleteOne({ _id: req.params.ID });
 
         if (deletedProduct.deletedCount === 0) {
             return res.status(404).json({
                 success: false,
-                message: `No product found with id ${req.params.Id}`,
+                message: `No product found with id ${req.params.ID}`,
             });
         }
 
         res.status(200).json({
             success: true,
-            message: `Product with id ${req.params.Id} deleted successfully`,
+            message: `Product with id ${req.params.ID} deleted successfully`,
             data: deletedProduct,
         });
 
@@ -147,7 +144,7 @@ const deleteProductByID = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to delete product',
-            error: error,
+            error: error.message,
         });
     }
 };
@@ -164,7 +161,7 @@ const getProductsByBrand = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to get products by brand',
-            error: error,
+            error: error.message,
         });
     }
 };
@@ -183,7 +180,7 @@ const getProductsByName = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to get products by name',
-            error: error,
+            error: error.message,
         });
     }
 };
@@ -200,7 +197,7 @@ const getProductsByCategory = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to get products by category',
-            error: error,
+            error: error.message,
         });
     }
 };
@@ -219,7 +216,7 @@ const getProductsByPriceRange = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to get products by price range',
-            error: error,
+            error: error.message,
         });
     }
 };
@@ -249,7 +246,7 @@ const getProductsByStockStatus = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to get products by stock status',
-            error: error,
+            error: error.message,
         });
     }
 };
@@ -268,7 +265,7 @@ const getProductsByDiscountPercentage = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Unable to get products by discount percentage',
-            error: error,
+            error: error.message,
         });
     }
 };
