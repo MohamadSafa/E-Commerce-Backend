@@ -23,7 +23,7 @@ const getCartByUserID = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Unable to get cart by user ID',
+            message: 'Unable to get cart by user id',
             error: error,
         });
     }

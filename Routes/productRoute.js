@@ -7,9 +7,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 const {
     addProduct,
     getAllProducts,
-    getProductById,
-    updateProductById,
-    deleteProductById,
+    getProductByID,
+    updateProductByID,
+    deleteProductByID,
     getProductsByBrand,
     getProductsByName,
     getProductsByCategory,
@@ -21,9 +21,9 @@ const {
 // Routes for Product CRUD operations
 router.post('/add', upload.single('image'), addProduct);
 router.get('/getAll', getAllProducts);
-router.get('/getByID/:ID', getProductById);
-router.put('/update/:ID', updateProductById);
-router.delete('/delete/:ID', deleteProductById);
+router.get('/getByID/:ID', getProductByID);
+router.put('/update/:ID', updateProductByID);
+router.delete('/delete/:ID', deleteProductByID);
 
 // Additional routes for querying products
 router.get('/:brand', getProductsByBrand);

@@ -1,6 +1,8 @@
 const Product = require('../models/product');
 const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 const { imageUploader } = require('../extra/imageUploader');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 const addProduct = async (req, res) => {
     try {
@@ -76,14 +78,14 @@ const getAllProducts = async (req, res) => {
     }
 };
 
-const getProductById = async (req, res) => {
+const getProductByID = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.ID);
+        const product = await Product.findById(req.params.Id);
 
         if (!product) {
             return res.status(404).json({
                 success: false,
-                message: `Product with ID ${req.params.ID} not found`,
+                message: `Product with id ${req.params.Id} not found`,
             });
         }
         res.status(200).json({
@@ -94,15 +96,15 @@ const getProductById = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Unable to get product data by ID',
+            message: 'Unable to get product data by id',
             error: error,
         });
     }
 };
 
-const updateProductById = async (req, res) => {
+const updateProductByID = async (req, res) => {
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.ID, req.body);
+        const updatedProduct = await Product.findByIdAndUpdate(req.params.Id, req.body);
         if (!updatedProduct) {
             res.status(404).json({
                 success: false,
@@ -124,20 +126,20 @@ const updateProductById = async (req, res) => {
     }
 };
 
-const deleteProductById = async (req, res) => {
+const deleteProductByID = async (req, res) => {
     try {
-        const deletedProduct = await Product.deleteOne({ _id: req.params.ID });
+        const deletedProduct = await Product.deleteOne({ _id: req.params.Id });
 
         if (deletedProduct.deletedCount === 0) {
             return res.status(404).json({
                 success: false,
-                message: `No product found with ID ${req.params.ID}`,
+                message: `No product found with id ${req.params.Id}`,
             });
         }
 
         res.status(200).json({
             success: true,
-            message: `Product with ID ${req.params.ID} deleted successfully`,
+            message: `Product with id ${req.params.Id} deleted successfully`,
             data: deletedProduct,
         });
 
@@ -274,9 +276,9 @@ const getProductsByDiscountPercentage = async (req, res) => {
 module.exports = {
     addProduct,
     getAllProducts,
-    getProductById,
-    updateProductById,
-    deleteProductById,
+    getProductByID,
+    updateProductByID,
+    deleteProductByID,
     getProductsByBrand,
     getProductsByName,
     getProductsByCategory,
