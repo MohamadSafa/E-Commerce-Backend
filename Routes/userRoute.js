@@ -12,7 +12,11 @@ router.delete(
   isAuthenticated(["admin"]),
   controllers.deleteUserByID
 );
-router.put("/update/:ID", isAuthenticated(["admin"]), controllers.updateByID);
+router.put(
+  "/update/:ID",
+  isAuthenticated(["admin"]),
+  controllers.updateUserByID
+);
 router.put(
   "/switchToAdmin/:ID",
   isAuthenticated(["admin"]),

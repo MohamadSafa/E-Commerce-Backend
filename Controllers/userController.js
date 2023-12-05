@@ -9,9 +9,9 @@ const generateToken = (id, role) => {
 };
 
 const addUser = async (req, res) => {
-  const { fullName, email, password, role, phoneNumber } = req.body;
+  const { fullName, email, password, role, phoneNumber, address } = req.body;
   try {
-    if (!fullName || !email || !password || !role || !phoneNumber)
+    if (!fullName || !email || !password || !role || !phoneNumber || !address)
       throw Error("All fields must be filled !");
     const exist = await User.findOne({ email });
     if (exist) throw Error("Email already in use");
@@ -23,6 +23,7 @@ const addUser = async (req, res) => {
       password: hashedPassword,
       role: role,
       phoneNumber: phoneNumber,
+      address: address,
     });
     if (!user) throw Error("An error occured during adding a user ");
     const token = generateToken(user._id, role);
@@ -39,7 +40,7 @@ const login = async (req, res) => {
   try {
     if (!email || !password) throw Error("All fields must be filled");
     const user = await User.find({ email, password }); // User.find({}) == select * from user
-    const exist = await Users.findOne({ email });
+    const exist = await User.findOne({ email });
     if (!exist) throw Error("Not registered yet");
     const comparing = await bcrypt.compare(password, exist.password);
     if (!comparing) throw Error("Passwords does not match");

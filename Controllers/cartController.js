@@ -1,285 +1,137 @@
+const Cart = require('../models/Cart');
+const User = require('../models/User');
 const Product = require('../models/Product');
-const { imageUploader } = require('../extra/imageUploader');
 
-const addProduct = async (req, res) => {
+const getCartByUserID = async (req, res) => {
     try {
-        const {
-            productName,
-            productBrand,
-            productDescription,
-            price,
-            category,
-            stock,
-            discountPercentage,
-        } = req.body;
+        const userExists = await User.findById(req.params.userID);
 
-        if (!productName || !productBrand || !productDescription || !price || !category || !stock) {
-            return res.status(400).json({
-                success: false,
-                message: 'All fields are required',
-            });
-        }
-
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message: 'Image file is required',
-            });
-        }
-
-        // Upload image to Cloudinary
-        const imageURL = await imageUploader(req);
-
-        const newProduct = new Product({
-            productName,
-            productBrand,
-            productImage: imageURL,
-            productDescription,
-            price,
-            category,
-            stock,
-            discountPercentage,
-        });
-
-        const savedProduct = await newProduct.save();
-
-        res.status(200).json({
-            success: true,
-            message: 'Product added successfully',
-            data: savedProduct,
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: 'Unable to add product',
-            error: error.message,
-        });
-    }
-};
-
-const getAllProducts = async (req, res) => {
-    try {
-        const products = await Product.find({});
-        res.status(200).json({
-            success: true,
-            message: 'Products retrieved successfully',
-            data: products,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Unable to get all products',
-            error: error.message,
-        });
-    }
-};
-
-const getProductByID = async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.ID);
-
-        if (!product) {
+        if (!userExists) {
             return res.status(404).json({
                 success: false,
-                message: `Product with id ${req.params.ID} not found`,
+                message: `No cart for the user with id ${req.params.userID}`,
             });
         }
+
+        const cart = await Cart.findOne({ userId: req.params.userID }).populate('products.productId', 'products.quantity');
+
         res.status(200).json({
             success: true,
-            message: 'Product data retrieved successfully',
-            data: product,
+            message: 'Data retrieved successfully',
+            data: cart,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Unable to get product data by id',
+            message: 'Unable to get cart by user id',
             error: error.message,
         });
     }
 };
 
-const updateProductByID = async (req, res) => {
+const addProductToCart = async (req, res) => {
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.ID, req.body);
-        if (!updatedProduct) {
-            res.status(404).json({
-                success: false,
-                message: 'Product not found',
-            });
-            return;
-        }
-        res.status(200).json({
-            success: true,
-            message: 'Product updated successfully',
-            data: updatedProduct,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Unable to update product',
-            error: error.message,
-        });
-    }
-};
+        const { productId, quantity } = req.body;
 
-const deleteProductByID = async (req, res) => {
-    try {
-        const deletedProduct = await Product.deleteOne({ _id: req.params.ID });
+        const productExists = await Product.findById(productId);
 
-        if (deletedProduct.deletedCount === 0) {
+        if (!productExists) {
             return res.status(404).json({
                 success: false,
-                message: `No product found with id ${req.params.ID}`,
+                message: `No product with id ${productId} available`,
             });
         }
 
-        res.status(200).json({
-            success: true,
-            message: `Product with id ${req.params.ID} deleted successfully`,
-            data: deletedProduct,
-        });
+        const cart = await Cart.findOne({ userId: req.params.userID });
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: `No cart for the user with id ${req.params.userID} available`,
+            });
+        }
 
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Unable to delete product',
-            error: error.message,
-        });
-    }
-};
-
-const getProductsByBrand = async (req, res) => {
-    try {
-        const products = await Product.find({ productBrand: req.params.brand });
-        res.status(200).json({
-            success: true,
-            message: 'Products retrieved by brand successfully',
-            data: products,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Unable to get products by brand',
-            error: error.message,
-        });
-    }
-};
-
-const getProductsByName = async (req, res) => {
-    try {
-        const products = await Product.find({
-            productName: { $regex: req.params.name, $options: 'i' },
-        });
-        res.status(200).json({
-            success: true,
-            message: 'Products retrieved by name successfully',
-            data: products,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Unable to get products by name',
-            error: error.message,
-        });
-    }
-};
-
-const getProductsByCategory = async (req, res) => {
-    try {
-        const products = await Product.find({ productCategory: req.params.category });
-        res.status(200).json({
-            success: true,
-            message: 'Products retrieved by category successfully',
-            data: products,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Unable to get products by category',
-            error: error.message,
-        });
-    }
-};
-
-const getProductsByPriceRange = async (req, res) => {
-    try {
-        const products = await Product.find({
-            price: { $gte: Number(req.params.minPrice), $lte: Number(req.params.maxPrice) },
-        });
-        res.status(200).json({
-            success: true,
-            message: 'Products retrieved by price range successfully',
-            data: products,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Unable to get products by price range',
-            error: error.message,
-        });
-    }
-};
-
-const getProductsByStockStatus = async (req, res) => {
-    try {
-        let products;
-
-        if (req.params.stockStatus === 'in-stock') {
-            products = await Product.find({ stock: { $gt: 0 } });
-        } else if (req.params.stockStatus === 'out-of-stock') {
-            products = await Product.find({ stock: 0 });
+        const existingProduct = cart.products.find(product => product.productId.toString() === productId);
+        if (existingProduct) {
+            existingProduct.quantity += quantity || 1;
         } else {
-            res.status(400).json({
-                success: false,
-                message: 'Invalid stock status parameter',
-            });
-            return;
+            cart.products.push({ productId, quantity: quantity || 1 });
         }
+
+        await cart.save();
 
         res.status(200).json({
             success: true,
-            message: 'Products retrieved by stock status successfully',
-            data: products,
+            message: 'Product added to cart successfully',
+            data: cart,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Unable to get products by stock status',
+            message: 'Unable to add product to cart',
             error: error.message,
         });
     }
 };
 
-const getProductsByDiscountPercentage = async (req, res) => {
+const updateProductInCart = async (req, res) => {
     try {
-        const products = await Product.find({
-            discountPercentage: { $gte: Number(req.params.minDiscount), $lte: Number(req.params.maxDiscount) },
-        });
+        const { productID, quantity } = req.body;
+
+        const cart = await Cart.findOne({ _id: req.params.cartID });
+
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: `No cart with id ${req.params.cartID} available`,
+            });
+        }
+
+        const productExists = await Product.findById(productID);
+
+        if (!productExists) {
+            return res.status(404).json({
+                success: false,
+                message: `No product with id ${productID} available`,
+            });
+        }
+
+        if (!cart.products.some(product => product.productId.toString() === productID)) {
+            // Product not found in the cart
+            return res.status(401).json({
+                success: false,
+                message: `Product with id ${productID} not found in your cart`,
+            });
+        }
+
+        const index = cart.products.indexOf(productID);
+        if (index !== -1) {
+            if (quantity > 0) {
+                // Update quantity
+                cart.products[index].quantity = quantity;
+            } else {
+                // Remove product if quantity is zero
+                cart.products.splice(index, 1);
+            }
+
+            await cart.save();
+        }
+
         res.status(200).json({
             success: true,
-            message: 'Products retrieved by discount percentage successfully',
-            data: products,
+            message: 'Cart updated successfully',
+            data: cart,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Unable to get products by discount percentage',
+            message: 'Unable to update cart',
             error: error.message,
         });
     }
 };
 
 module.exports = {
-    addProduct,
-    getAllProducts,
-    getProductByID,
-    updateProductByID,
-    deleteProductByID,
-    getProductsByBrand,
-    getProductsByName,
-    getProductsByCategory,
-    getProductsByPriceRange,
-    getProductsByStockStatus,
-    getProductsByDiscountPercentage,
+    getCartByUserID,
+    addProductToCart,
+    updateProductInCart,
 };
