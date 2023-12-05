@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    totalQuantity: { type: INT, required: true },
-    totalPrice: { type: INT, required: true },
+    totalQuantity: { type: Number, required: true },
+    totalPrice: { type: Number, required: true },
     payment: { type: String, required: true },
     orderStatus: { type: String, required: true },
 });
