@@ -84,12 +84,12 @@ const getAllProducts = async (req, res) => {
 
 const getProductByID = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.Id);
+    const product = await Product.findById(req.params.ID);
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: `Product with id ${req.params.Id} not found`,
+        message: `Product with id ${req.params.ID} not found`,
       });
     }
     res.status(200).json({
@@ -109,7 +109,7 @@ const getProductByID = async (req, res) => {
 const updateProductByID = async (req, res) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.Id,
+      req.params.ID,
       req.body
     );
     if (!updatedProduct) {
@@ -135,18 +135,18 @@ const updateProductByID = async (req, res) => {
 
 const deleteProductByID = async (req, res) => {
   try {
-    const deletedProduct = await Product.deleteOne({ _id: req.params.Id });
+    const deletedProduct = await Product.deleteOne({ _id: req.params.ID });
 
     if (deletedProduct.deletedCount === 0) {
       return res.status(404).json({
         success: false,
-        message: `No product found with id ${req.params.Id}`,
+        message: `No product found with id ${req.params.ID}`,
       });
     }
 
     res.status(200).json({
       success: true,
-      message: `Product with id ${req.params.Id} deleted successfully`,
+      message: `Product with id ${req.params.ID} deleted successfully`,
       data: deletedProduct,
     });
   } catch (error) {

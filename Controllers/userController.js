@@ -156,49 +156,74 @@ const updateUserByID = async (req, res) => {
 };
 
 const switchToAdmin = async (req, res) => {
-  const { ID } = req.params;
+  const userId = req.params.ID;
 
   try {
-    const [response] = await connection.query(query, [ID]);
-    if (!response.affectedRows)
+    const user = await User.findById(userId);
+
+    if (!user) {
       return res.status(400).json({
         success: false,
-        message: `User with ID = ${ID} not found`,
+        message: `User with id = ${userId} not found.`,
       });
-    const data = await getUserByID(ID);
-    res.status(200).json({
+    }
+
+    if (user.role === "admin") {
+      return res.status(400).json({
+        success: false,
+        message: `User with id = ${userId} is already an admin.`,
+      });
+    }
+
+    user.role = "admin";
+    await user.save();
+
+    return res.status(200).json({
       success: true,
-      message: `User with ID = ${ID} switched to admin successfully`,
-      data: data[0],
+      message: `User with id ${userId} switched to admin successfully.`,
+      data: user,
     });
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: `Unable to switch to admin for user with ID = ${ID}`,
+      message: `Error while trying to update user with id ${userId}.`,
       error: error.message,
     });
   }
 };
 
 const switchToSeller = async (req, res) => {
-  const { ID } = req.params;
+  const userId = req.params.ID;
+
   try {
-    const [response] = await connection.query(query, [ID]);
-    if (!response.affectedRows)
+    const user = await User.findById(userId);
+
+    if (!user) {
       return res.status(400).json({
         success: false,
-        message: `User with ID = ${ID} not found`,
+        message: `User with id = ${userId} not found.`,
       });
-    const data = await getUserByID(ID);
-    res.status(200).json({
+    }
+
+    if (user.role === "seller") {
+      return res.status(400).json({
+        success: false,
+        message: `User with id = ${userId} is already a seller.`,
+      });
+    }
+
+    user.role = "seller";
+    await user.save();
+
+    return res.status(200).json({
       success: true,
-      message: `User with ID = ${ID} switched to admin successfully`,
-      data: data[0],
+      message: `User with id ${userId} switched to seller successfully.`,
+      data: user,
     });
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: `Unable to switch to admin for user with ID = ${ID}`,
+      message: `Error while trying to update user with id ${userId}.`,
       error: error.message,
     });
   }
