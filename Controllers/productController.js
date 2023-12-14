@@ -100,6 +100,7 @@ const getProductByID = async (req, res) => {
 };
 
 const updateProductByID = async (req, res) => {
+    console.log(req);
     try {
         const updatedProduct = await Product.findByIdAndUpdate(req.params.ID, req.body);
         if (!updatedProduct) {
@@ -188,6 +189,7 @@ const getProductsByName = async (req, res) => {
 const getProductsByCategory = async (req, res) => {
     try {
         const products = await Product.find({ productCategory: req.params.category });
+        console.log(products);
         res.status(200).json({
             success: true,
             message: 'Products retrieved by category successfully',
