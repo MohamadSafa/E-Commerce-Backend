@@ -107,10 +107,18 @@ const getProductByID = async (req, res) => {
 };
 
 const updateProductByID = async (req, res) => {
+  let imageURL = "";
   try {
+    if (req.file) {
+      // Upload image to Cloudinary
+      imageURL = await imageUploader(req);
+    } else {
+      imageURL = req.body.productImage;
+    }
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.ID,
-      req.body
+      { ...req.body, productImage: imageURL },
+      { new: true }
     );
     if (!updatedProduct) {
       res.status(404).json({
@@ -197,7 +205,7 @@ const getProductsByName = async (req, res) => {
 const getProductsByCategory = async (req, res) => {
   try {
     const products = await Product.find({
-      productCategory: req.params.category,
+      category: req.params.category,
     });
     res.status(200).json({
       success: true,
@@ -237,6 +245,11 @@ const getProductsByPriceRange = async (req, res) => {
 
 const getProductsByStockStatus = async (req, res) => {
   try {
+
+    // get product by id -> find({_id: req,params,productID})
+    // check stock of this product -> product object check the stock field
+    // if > 0 -> in stock otherwise out of stock + return stock number
+    
     let products;
 
     if (req.params.stockStatus === "in-stock") {

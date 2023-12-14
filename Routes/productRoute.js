@@ -21,14 +21,17 @@ const {
 router.post("/add", upload.single("productImage"), addProduct);
 router.get("/getAll", getAllProducts);
 router.get("/getByID/:ID", getProductByID);
-router.put("/update/:ID", updateProductByID);
+router.put("/update/:ID", upload.single("productImage"), updateProductByID);
 router.delete("/delete/:ID", deleteProductByID);
 
-router.get("/get/:brand", getProductsByBrand);
-router.get("/get/:name", getProductsByName);
-router.get("/get/:category", getProductsByCategory);
-router.get("/get/:minPrice/:maxPrice", getProductsByPriceRange);
-router.get("/get/:stockStatus", getProductsByStockStatus);
-router.get("/get/:minDiscount/:maxDiscount", getProductsByDiscountPercentage);
+router.get("/getBrand/:brand", getProductsByBrand);
+router.get("/getName/:name", getProductsByName);
+router.get("/getCategory/:category", getProductsByCategory);
+router.get("/getPrice/:minPrice/:maxPrice", getProductsByPriceRange);
+router.get("/getStock/:stockStatus", getProductsByStockStatus);
+router.get(
+  "/getDiscount/:minDiscount/:maxDiscount",
+  getProductsByDiscountPercentage
+);
 
 module.exports = router;
