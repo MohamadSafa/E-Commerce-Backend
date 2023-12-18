@@ -48,7 +48,7 @@ const login = async (req, res) => {
     res.status(200).json({ message: "login successfully", token });
   } catch (error) {
     res
-      .status(500)
+      .status(403)
       .json({ message: `Failed to login by ${email}`, error: error.message });
   }
 };

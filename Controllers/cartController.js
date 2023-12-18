@@ -1,63 +1,98 @@
-const Cart = require('../models/Cart');
-const User = require('../models/User');
+const Cart = require('../models/cart');
 const Product = require('../models/Product');
+const User = require("../models/User");
 
-const getCartByUserID = async (req, res) => {
+// const getCartByUserID = async (req, res) => {
+//     try {
+//         const userExists = await User.findById(req.params.userID);
+
+//         if (!userExists) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: `No cart for the user with id ${req.params.userID}`,
+//             });
+//         }
+
+//         const cart = await Cart.findOne({ userId: req.params.userID }).populate('products.productId', 'products.quantity');
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Data retrieved successfully',
+//             data: cart,
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: 'Unable to get cart by user id',
+//             error: error.message,
+//         });
+//     }
+// };
+
+// const addProductToCart = async (req, res) => {
+//     try {
+//         const { productId, quantity } = req.body;
+
+//         const productExists = await Product.findById(productId);
+
+//         if (!productExists) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: `No product with id ${productId} available`,
+//             });
+//         }
+
+//         const cart = await Cart.findOne({ userId: req.params.userID });
+//         if (!cart) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: `No cart for the user with id ${req.params.userID} available`,
+//             });
+//         }
+
+//         const existingProduct = cart.products.find(product => product.productId.toString() === productId);
+//         if (existingProduct) {
+//             existingProduct.quantity += quantity || 1;
+//         } else {
+//             cart.products.push({ productId, quantity: quantity || 1 });
+//         }
+
+//         await cart.save();
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Product added to cart successfully',
+//             data: cart,
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: 'Unable to add product to cart',
+//             error: error.message,
+//         });
+//     }
+// };
+
+const addProduct = async (req, res) => {
+    const { userId, products } = req.body;
+
     try {
-        const userExists = await User.findById(req.params.userID);
-
-        if (!userExists) {
-            return res.status(404).json({
-                success: false,
-                message: `No cart for the user with id ${req.params.userID}`,
-            });
-        }
-
-        const cart = await Cart.findOne({ userId: req.params.userID }).populate('products.productId', 'products.quantity');
-
-        res.status(200).json({
-            success: true,
-            message: 'Data retrieved successfully',
-            data: cart,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Unable to get cart by user id',
-            error: error.message,
-        });
-    }
-};
-
-const addProductToCart = async (req, res) => {
-    try {
-        const { productId, quantity } = req.body;
-
-        const productExists = await Product.findById(productId);
-
-        if (!productExists) {
-            return res.status(404).json({
-                success: false,
-                message: `No product with id ${productId} available`,
-            });
-        }
-
-        const cart = await Cart.findOne({ userId: req.params.userID });
+        let cart = await Cart.findOne({ userId: userId });
+        console.log(cart)
         if (!cart) {
-            return res.status(404).json({
-                success: false,
-                message: `No cart for the user with id ${req.params.userID} available`,
+            cart = new Cart({ userId: userId, products: products});
+            const addedCart = await cart.save();
+            return res.status(200).json({
+                success: true,
+                message: 'Product added to cart successfully',
+                data: addedCart,
             });
         }
+        
+        // cart.products.push(productId);
 
-        const existingProduct = cart.products.find(product => product.productId.toString() === productId);
-        if (existingProduct) {
-            existingProduct.quantity += quantity || 1;
-        } else {
-            cart.products.push({ productId, quantity: quantity || 1 });
-        }
-
-        await cart.save();
+        // const createCart = await cart.save();
+        
 
         res.status(200).json({
             success: true,
@@ -131,7 +166,8 @@ const updateProductInCart = async (req, res) => {
 };
 
 module.exports = {
-    getCartByUserID,
-    addProductToCart,
+    // getCartByUserID,
+    // addProductToCart,
+    addProduct,
     updateProductInCart,
 };
