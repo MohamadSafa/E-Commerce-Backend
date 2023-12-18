@@ -1,6 +1,6 @@
 const Cart = require('../models/cart');
-const User = require('../models/user');
 const Product = require('../models/Product');
+const User = require("../models/User");
 
 // const getCartByUserID = async (req, res) => {
 //     try {
@@ -74,18 +74,25 @@ const Product = require('../models/Product');
 // };
 
 const addProduct = async (req, res) => {
-    const { userId, productId } = req.body;
+    const { userId, products } = req.body;
 
     try {
-        let cart = await Cart.findOne({ user: userId });
-
+        let cart = await Cart.findOne({ userId: userId });
+        console.log(cart)
         if (!cart) {
-            cart = new Cart({ userId: userId, products: [] });
+            cart = new Cart({ userId: userId, products: products});
+            const addedCart = await cart.save();
+            return res.status(200).json({
+                success: true,
+                message: 'Product added to cart successfully',
+                data: addedCart,
+            });
         }
+        
+        // cart.products.push(productId);
 
-        cart.products.push(productId);
-
-        await cart.save();
+        // const createCart = await cart.save();
+        
 
         res.status(200).json({
             success: true,
