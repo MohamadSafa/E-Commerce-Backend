@@ -2,6 +2,33 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const User = require("../models/User");
 
+const getCartByUserID = async (req, res) => {
+    try {
+        const userExists = await User.findById(req.params.userID);
+
+        if (!userExists) {
+            return res.status(404).json({
+                success: false,
+                message: `No cart for the user with id ${req.params.userID}`,
+            });
+        }
+
+        const cart = await Cart.findOne({ userId: req.params.userID }).populate('products.productId', 'products.quantity');
+
+        res.status(200).json({
+            success: true,
+            message: 'Data retrieved successfully',
+            data: cart,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Unable to get cart by user id',
+            error: error.message,
+        });
+    }
+};
+
 const getAllCarts = async (req, res) => {
     try {
         const carts = await Cart.find({});
@@ -56,9 +83,6 @@ const addProduct = async (req, res) => {
                 data: addedCart,
             });
         }
-        // cart.products.push(productId);
-
-        // const createCart = await cart.save();
 
         res.status(200).json({
             success: true,
@@ -156,8 +180,7 @@ const deleteCartByID = async (req, res) => {
 };
 
 module.exports = {
-    // getCartByUserID,
-    // addProductToCart,
+    getCartByUserID,
     getAllCarts,
     getCartByID,
     addProduct,
