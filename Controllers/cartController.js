@@ -1,6 +1,6 @@
 const Cart = require('../models/cart');
-const User = require('../models/user');
 const Product = require('../models/product');
+const User = require("../models/user");
 
 // const getCartByUserID = async (req, res) => {
 //     try {
@@ -73,19 +73,66 @@ const Product = require('../models/product');
 //     }
 // };
 
+const getAllCarts = async (req, res) => {
+    try {
+        const carts = await Cart.find({});
+        res.status(200).json({
+            success: true,
+            message: "All Carts retrieved successfully",
+            data: carts,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Unable to retrieve carts",
+            error: error.message,
+        });
+    }
+};
+
+const getCartByID = async (req, res) => {
+    try {
+        const cart = await Cart.findById(req.params.ID);
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: "Cart not found",
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Cart retrieved successfully",
+            data: cart,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Unable to get cart by ID",
+            error: error.message,
+        });
+    }
+};
+
 const addProduct = async (req, res) => {
-    const { userId, productId } = req.body;
+    const { userId, products } = req.body;
 
     try {
-        let cart = await Cart.findOne({ user: userId });
-
+        let cart = await Cart.findOne({ userId: userId });
+        console.log(cart)
         if (!cart) {
-            cart = new Cart({ userId: userId, products: [] });
+            cart = new Cart({ userId: userId, products: products });
+            const addedCart = await cart.save();
+            return res.status(200).json({
+                success: true,
+                message: 'Product added to cart successfully',
+                data: addedCart,
+            });
         }
 
-        cart.products.push(productId);
+        // cart.products.push(productId);
 
-        await cart.save();
+        // const createCart = await cart.save();
+
 
         res.status(200).json({
             success: true,
@@ -158,9 +205,36 @@ const updateProductInCart = async (req, res) => {
     }
 };
 
+const deleteCartByID = async (req, res) => {
+    const { ID } = req.params;
+    try {
+        const cart = await Cart.deleteOne({ _id: ID });
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: "Cart not found",
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Cart deleted successfully",
+            data: cart,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "unable to delete cart",
+            error: error.message,
+        });
+    }
+};
+
 module.exports = {
     // getCartByUserID,
     // addProductToCart,
+    getAllCarts,
+    getCartByID,
     addProduct,
     updateProductInCart,
+    deleteCartByID,
 };
