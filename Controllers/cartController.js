@@ -71,7 +71,7 @@ const addProductToCart = async (req, res) => {
             error: error.message,
         });
     }
-};z
+};
 
 const updateProductInCart = async (req, res) => {
     try {
