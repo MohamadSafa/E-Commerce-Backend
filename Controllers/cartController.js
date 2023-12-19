@@ -2,32 +2,32 @@ const Cart = require('../models/cart');
 const Product = require('../models/product');
 const User = require("../models/user");
 
-// const getCartByUserID = async (req, res) => {
-//     try {
-//         const userExists = await User.findById(req.params.userID);
+const getCartByUserID = async (req, res) => {
+    try {
+        const userExists = await User.findById(req.params.userID);
 
-//         if (!userExists) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: `No cart for the user with id ${req.params.userID}`,
-//             });
-//         }
+        if (!userExists) {
+            return res.status(404).json({
+                success: false,
+                message: `No cart for the user with id ${req.params.userID}`,
+            });
+        }
 
-//         const cart = await Cart.findOne({ userId: req.params.userID }).populate('products.productId', 'products.quantity');
+        const cart = await Cart.findOne({ userId: req.params.userID }).populate('products.productId', 'products.quantity');
 
-//         res.status(200).json({
-//             success: true,
-//             message: 'Data retrieved successfully',
-//             data: cart,
-//         });
-//     } catch (error) {
-//         res.status(500).json({
-//             success: false,
-//             message: 'Unable to get cart by user id',
-//             error: error.message,
-//         });
-//     }
-// };
+        res.status(200).json({
+            success: true,
+            message: 'Data retrieved successfully',
+            data: cart,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Unable to get cart by user id',
+            error: error.message,
+        });
+    }
+};
 
 // const addProductToCart = async (req, res) => {
 //     try {
