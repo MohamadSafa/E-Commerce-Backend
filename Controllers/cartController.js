@@ -13,12 +13,14 @@ const getCartByUserID = async (req, res) => {
             });
         }
 
-        const cart = await Cart.findOne({ userId: req.params.userID }).populate('products.productId', 'products.quantity');
-
+        const cart = await Cart.findOne({ userId: req.params.userID })
+        console.log(cart.products[0].productId.toString());
+        //.populate('products.productId', 'products.quantity');
+        const product = await Product.findOne({_id:cart.products[0].productId.toString()})
         res.status(200).json({
             success: true,
             message: 'Data retrieved successfully',
-            data: cart,
+            data: product,
         });
     } catch (error) {
         res.status(500).json({
@@ -158,7 +160,7 @@ const updateProductInCart = async (req, res) => {
 const deleteCartByID = async (req, res) => {
     const { ID } = req.params;
     try {
-        const cart = await Cart.deleteOne({ _id: ID });
+        const cart = await Cart.deleteOne({ userId: ID });
         if (!cart) {
             return res.status(404).json({
                 success: false,

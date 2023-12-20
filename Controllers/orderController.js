@@ -35,13 +35,20 @@ const getOrderByID = async (req, res) => {
 };
 
 const addOrder = async (req, res) => {
-  const { totalQuantity, totalPrice, payment, orderStatus } = req.body;
+  const { userId, productId , quantity, totalQuantity, totalPrice, payment, orderStatus } = req.body;
 
   try {
-    if (!totalQuantity || !totalPrice || !payment || !orderStatus) {
+    if ( !userId || !productId || !quantity || !totalQuantity || !totalPrice || !payment || !orderStatus) {
       throw error("All field must be filled");
     }
     const order = await Order.create({
+      userId,
+      products: [
+        {
+            productId,
+            quantity 
+        }
+    ],
       totalQuantity,
       totalPrice,
       payment,
