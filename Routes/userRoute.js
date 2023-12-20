@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const controllers = require("../Controllers/userController");
-const isAuthenticated = require("../middlewares/Auth");
+const isAuthenticated = require("../middlewares/auth");
 
 router.post("/login", controllers.login); // we put 'post' not 'get' because we are passing the email and password by req.body
 router.post("/register", controllers.addUser);
