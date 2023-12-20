@@ -1,6 +1,6 @@
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
-const User = require("../models/User");
+const User = require("../models/user");
 
 const getCartByUserID = async (req, res) => {
     try {
